@@ -1,3 +1,36 @@
 from django.db import models
 
 # Create your models here.
+class Customer(models.Model):
+    name = models.CharField(max_length=200)
+    phone = models.CharField(max_length=200)
+    email = models.CharField(max_length=200)
+    date_created = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+class Product(models.Model):
+    CATEGORY = (
+        ('Indoor','Indoor'),
+        ('Out Dor','Out Dor')
+    )
+    name        = models.CharField(max_length=200)
+    price       = models.FloatField()
+    category    = models.CharField(max_length=200,null = True, choices= CATEGORY)
+    description = models.CharField(max_length=200)
+    date_created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.name
+
+class Order(models.Model):
+    STATUS = (
+        ('Pending','Pending'),
+        ('Out For Delivery','Out For Delivery'),
+        ('Delivery', 'Delivery')
+    )
+    #customer
+    #product
+    date_created = models.DateTimeField(auto_now_add= True)
+    statu = models.CharField(max_length = 200,null= True, choices = STATUS)
