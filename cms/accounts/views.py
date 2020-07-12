@@ -11,10 +11,12 @@ from django.http import HttpResponse
 from .models import Product, Order, Customer
 from .forms import OrderForm, CreateUserForm
 from .filters import OrderFilter
+from .decorators import unauthenticated_user,allowed_users
 
 # Create your views here.
 
 @login_required(login_url='login')
+@allowed_users(allowed_roles=['admin'])
 def home(request):
     orders = Order.objects.all()
     customers = Customer.objects.all()
@@ -29,9 +31,9 @@ def home(request):
                 'total_orders':total_orders,'delivered':delivered,'pending':pending}
     return render(request,'accounts/dashboard.html',context)
 
-
+@unauthenticated_user
 def loginPage(request):
-    context = {}
+    print(request)
     if request.method =='POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -44,13 +46,14 @@ def loginPage(request):
         else:
             messages.info(request, 'Username Or password is incorrect')
             
-    
+    context = {}
     return render(request, 'accounts/login.html',context)
 
 def logoutUser(request):
     logout(request)
     return redirect('login')
 
+@unauthenticated_user
 def registerPage(request):
     form = CreateUserForm()
 
@@ -79,6 +82,7 @@ def customer(request, pk_test):
     'myFilter':myFilter}
     return render(request,'accounts/customers.html',context)
 @login_required(login_url='login')
+@allowed_users(allowed_roles=['admin'])
 def createOrder(request, pk):
     OrderFormSet = inlineformset_factory(Customer, Order,fields=('product','status'),extra=10)
     customer = Customer.objects.get(id=pk)
@@ -106,6 +110,7 @@ def updateOrder(request, pk):
     context = {'form':form}
     return render(request,'accounts/order_form.html', context)
 @login_required(login_url='login')
+@allowed_users(allowed_roles=['admin'])
 def deleteOrder(request, pk):
     order = Order.objects.get(id=pk)
     context = {
