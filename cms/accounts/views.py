@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate, login, logout
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
 
 from django.http import HttpResponse
 from .models import Product, Order, Customer
@@ -62,6 +63,9 @@ def registerPage(request):
         if form.is_valid():
             form.save()
             user = form.cleaned_data.get('username')
+            group = Group.objects.get(name='customer')
+            user.group.add(group)
+            
             messages.success(request, 'Account was created for '+ user)
             return redirect ('login')
     
