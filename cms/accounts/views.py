@@ -5,6 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
 from django.http import HttpResponse
 from .models import Product, Order, Customer
@@ -13,6 +14,7 @@ from .filters import OrderFilter
 
 # Create your views here.
 
+@login_required(login_url='login')
 def home(request):
     orders = Order.objects.all()
     customers = Customer.objects.all()
@@ -76,7 +78,7 @@ def customer(request, pk_test):
     context = {'customer':customer,'orders':orders,'orders_count':orders_count,
     'myFilter':myFilter}
     return render(request,'accounts/customers.html',context)
-
+@login_required(login_url='login')
 def createOrder(request, pk):
     OrderFormSet = inlineformset_factory(Customer, Order,fields=('product','status'),extra=10)
     customer = Customer.objects.get(id=pk)
@@ -103,7 +105,7 @@ def updateOrder(request, pk):
     
     context = {'form':form}
     return render(request,'accounts/order_form.html', context)
-
+@login_required(login_url='login')
 def deleteOrder(request, pk):
     order = Order.objects.get(id=pk)
     context = {
