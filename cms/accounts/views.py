@@ -12,12 +12,12 @@ from django.http import HttpResponse
 from .models import Product, Order, Customer
 from .forms import OrderForm, CreateUserForm
 from .filters import OrderFilter
-from .decorators import unauthenticated_user,allowed_users
+from .decorators import unauthenticated_user,allowed_users,admin_only
 
 # Create your views here.
 
 @login_required(login_url='login')
-@allowed_users(allowed_roles=['admin'])
+@admin_only
 def home(request):
     orders = Order.objects.all()
     customers = Customer.objects.all()
@@ -85,6 +85,8 @@ def customer(request, pk_test):
     context = {'customer':customer,'orders':orders,'orders_count':orders_count,
     'myFilter':myFilter}
     return render(request,'accounts/customers.html',context)
+
+
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin'])
 def createOrder(request, pk):
@@ -113,6 +115,8 @@ def updateOrder(request, pk):
     
     context = {'form':form}
     return render(request,'accounts/order_form.html', context)
+
+
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['admin'])
 def deleteOrder(request, pk):
@@ -126,4 +130,17 @@ def deleteOrder(request, pk):
         return redirect('/')
     return render(request, 'accounts/delete.html', context)
     
-    
+@login_required(login_url='login')
+@allowed_users(allowed_roles=['customer'])
+def userPage(request):
+	orders = request.user.customer.order_set.all()
+
+	total_orders = orders.count()
+	delivered = orders.filter(status='Delivered').count()
+	pending = orders.filter(status='Pending').count()
+
+	print('ORDERS:', orders)
+
+	context = {'orders':orders, 'total_orders':total_orders,
+	'delivered':delivered,'pending':pending}
+	return render(request, 'accounts/user.html', context)
