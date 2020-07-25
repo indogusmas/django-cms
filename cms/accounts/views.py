@@ -10,7 +10,7 @@ from django.contrib.auth.models import Group
 
 from django.http import HttpResponse
 from .models import Product, Order, Customer
-from .forms import OrderForm, CreateUserForm
+from .forms import OrderForm, CreateUserForm,CustomerForm
 from .filters import OrderFilter
 from .decorators import unauthenticated_user,allowed_users,admin_only
 
@@ -148,5 +148,13 @@ def userPage(request):
 @login_required(login_url='login')
 @allowed_users(allowed_roles=['customer'])
 def accountsSettings(request):
-    context = {}
-    return render(request,'accounts/acount_setting.html',context)
+    customer = request.user.customer
+    form = CustomerForm(instance=customer)
+    
+    if request.method == 'POST':
+        form = CustomerForm(request.POST, request.FILES,instance=customer)
+        if form.is_valid():
+            form.save()
+
+    context = {'form':form}
+    return render(request,'accounts/account_setting.html',context)
